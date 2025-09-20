@@ -1,0 +1,128 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Fix incorrect paths
+# Replace these incorrect paths
+./backend/__pycache__/
+./frontend/__pycache__/
+./backend/scraped_data/
+./backend/vector_databases/
+./frontend/node_modules
+
+# With these correct paths
+backend/__pycache__/
+frontend/__pycache__/
+backend/scraped_data/
+backend/vector_databases/
+frontend/node_modules/
+
+# Python virtual environments
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+
+# Node/React
+# Remove this incorrect path
+./frontend/node_modules/
+# It's already correctly added above
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.pnp/
+.pnp.js
+
+# Production build
+/frontend/build
+/frontend/dist
+
+# Testing
+/coverage
+
+# Development
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Data files
+*.csv
+*.sqlite3
+*.db
+
+# Vector databases and large files (comment out if you need to track these)
+/backend/vector_databases/*
+/backend/scraped_data/*
+
+# Temporary files
+*.swp
+*~
+
+# Additional patterns for RAG systems
+*.vec
+*.index
+*.bin
+*.model
+*.pkl
+embeddings/
+models/
+cache/
+
+# Ollama related
+ollama_data/
+.ollama/
+
+# Logs and temporary files
+logs/
+tmp/
+temp/
+
+# Configuration files that might contain sensitive information
+config.json
+secrets.json
+.env.prod

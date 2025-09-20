@@ -1,0 +1,11 @@
+Django
+djangorestframework
+django-cors-headers
+langchain
+langchain-ollama
+langchain-chroma
+pandas
+requests
+beautifulsoup4
+chromadb
+lxml
