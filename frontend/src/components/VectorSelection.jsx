@@ -7,21 +7,23 @@ const VectorSelection = ({ onSelectWebsite }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedWebsite, setSelectedWebsite] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const fetchWebsites = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get('/api/websites/');
+      // Filter out websites without a vector_db_id
+      const vectorizedWebsites = response.data.filter(website => website.vector_db_id);
+      setWebsites(vectorizedWebsites);
+      setIsLoading(false);
+    } catch (err) {
+      setError('Failed to load vectorized websites');
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchWebsites = async () => {
-      try {
-        const response = await axios.get('/api/websites/');
-        // Filter out websites without a vector_db_id
-        const vectorizedWebsites = response.data.filter(website => website.vector_db_id);
-        setWebsites(vectorizedWebsites);
-        setIsLoading(false);
-      } catch (err) {
-        setError('Failed to load vectorized websites');
-        setIsLoading(false);
-      }
-    };
-
     fetchWebsites();
   }, []);
 
@@ -34,6 +36,45 @@ const VectorSelection = ({ onSelectWebsite }) => {
         vectorDbId: website.vector_db_id,
         url: website.url
       });
+    }
+  };
+
+  const handleDeleteWebsite = async (website, event) => {
+    // Prevent the click from selecting the website
+    event.stopPropagation();
+    
+    // Confirm deletion
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${website.url}"?\n\nThis will permanently remove:\n- Vector database\n- Scraped data\n- All chat history\n\nThis action cannot be undone.`
+    );
+    
+    if (!confirmDelete) return;
+    
+    try {
+      setDeletingId(website.id);
+      setError('');
+      
+      // Call the delete endpoint
+      await axios.post('/api/websites/delete_vectorized_data/', {
+        vector_db_id: website.vector_db_id
+      });
+      
+      // If the deleted website was selected, clear the selection
+      if (selectedWebsite?.id === website.id) {
+        setSelectedWebsite(null);
+        if (onSelectWebsite) {
+          onSelectWebsite(null);
+        }
+      }
+      
+      // Refresh the websites list
+      await fetchWebsites();
+      
+    } catch (err) {
+      console.error('Error deleting website:', err);
+      setError(`Failed to delete website: ${err.response?.data?.error || err.message}`);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -56,6 +97,7 @@ const VectorSelection = ({ onSelectWebsite }) => {
   return (
     <div className="vector-selection-container">
       <h2>Select Vectorized Website</h2>
+      {error && <div className="error">{error}</div>}
       <div className="websites-list">
         {websites.map((website) => (
           <div 
@@ -63,9 +105,19 @@ const VectorSelection = ({ onSelectWebsite }) => {
             className={`website-item ${selectedWebsite?.id === website.id ? 'selected' : ''}`}
             onClick={() => handleSelectWebsite(website)}
           >
-            <h3>{website.title || website.url}</h3>
-            <p className="website-url">{website.url}</p>
-            <p className="website-date">Scraped on: {new Date(website.date_scraped).toLocaleString()}</p>
+            <div className="website-item-content">
+              <h3>{website.title || website.url}</h3>
+              <p className="website-url">{website.url}</p>
+              <p className="website-date">Scraped on: {new Date(website.date_scraped).toLocaleString()}</p>
+            </div>
+            <button
+              className="delete-button"
+              onClick={(e) => handleDeleteWebsite(website, e)}
+              disabled={deletingId === website.id}
+              title="Delete this website"
+            >
+              {deletingId === website.id ? '⏳' : '🗑️'}
+            </button>
           </div>
         ))}
       </div>

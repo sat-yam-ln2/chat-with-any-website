@@ -187,6 +187,61 @@ class WebsiteViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=False, methods=['post'])
+    def delete_vectorized_data(self, request):
+        """Delete vectorized data including vector DB, scraped data, and database entries"""
+        vector_db_id = request.data.get('vector_db_id')
+        
+        if not vector_db_id:
+            return Response({'error': 'vector_db_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            import shutil
+            
+            # Get the website from database
+            try:
+                website = Website.objects.get(vector_db_id=vector_db_id)
+                website_url = website.url
+            except Website.DoesNotExist:
+                return Response({'error': 'Website not found in database'}, 
+                              status=status.HTTP_404_NOT_FOUND)
+            
+            # Delete vector database directory
+            vector_db_path = os.path.join(settings.VECTOR_DB_PATH, vector_db_id)
+            if os.path.exists(vector_db_path):
+                shutil.rmtree(vector_db_path)
+                self.logger.info(f"Deleted vector database: {vector_db_path}")
+            
+            # Delete scraped CSV file
+            csv_filename = os.path.join(settings.SCRAPED_DATA_PATH, f"{vector_db_id}_scraped_data.csv")
+            if os.path.exists(csv_filename):
+                os.remove(csv_filename)
+                self.logger.info(f"Deleted scraped data file: {csv_filename}")
+            
+            # Delete scraped content from database
+            scraped_count = ScrapedContent.objects.filter(website=website).count()
+            ScrapedContent.objects.filter(website=website).delete()
+            self.logger.info(f"Deleted {scraped_count} scraped content entries from database")
+            
+            # Delete website entry from database
+            website.delete()
+            self.logger.info(f"Deleted website entry: {website_url}")
+            
+            # Get updated list of vectorized websites
+            vectorized_websites = list_vectorized_databases()
+            
+            return Response({
+                'message': f'Successfully deleted vectorized data for {website_url}',
+                'deleted_vector_db_id': vector_db_id,
+                'vectorized_databases': vectorized_websites
+            })
+            
+        except Exception as e:
+            self.logger.error(f"Error deleting vectorized data: {str(e)}")
+            return Response({
+                'error': f'An error occurred while deleting: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False, methods=['post'])
     def scrape(self, request):
         """Scrape a website and store its content"""
         url = request.data.get('url')
@@ -319,19 +374,31 @@ class WebsiteViewSet(viewsets.ModelViewSet):
                     # Use the combined_text as the main content for vectorization
                     content = row['combined_text']
                     
-                    # Skip rows with insufficient content
-                    if not content or len(content.strip()) < 10:
+                    # Convert to string and handle NaN/None values
+                    if pd.isna(content):
                         continue
+                    
+                    content = str(content).strip()
+                    
+                    # Skip rows with insufficient content
+                    if not content or len(content) < 10:
+                        continue
+                    
+                    # Helper function to safely convert metadata values
+                    def safe_str(value):
+                        if pd.isna(value):
+                            return ""
+                        return str(value).strip()
                     
                     # Create a Document object with metadata
                     doc = Document(
                         page_content=content,
                         metadata={
-                            "url": row["url"],
-                            "title": row["title"],
-                            "meta_description": row["meta_description"],
-                            "word_count": row["word_count"],
-                            "url_hash": row["url_hash"]
+                            "url": safe_str(row["url"]),
+                            "title": safe_str(row["title"]),
+                            "meta_description": safe_str(row["meta_description"]),
+                            "word_count": int(row["word_count"]) if not pd.isna(row["word_count"]) else 0,
+                            "url_hash": safe_str(row["url_hash"])
                         }
                     )
                     
@@ -598,8 +665,11 @@ class WebScraper:
         Returns:
             str: Cleaned text
         """
-        if not text:
+        if not text or text is None:
             return ""
+        
+        # Convert to string in case it's not
+        text = str(text)
         
         # Remove extra whitespace and newlines
         text = re.sub(r'\s+', ' ', text)
