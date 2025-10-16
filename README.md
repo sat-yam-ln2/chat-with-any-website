@@ -22,6 +22,11 @@ A Retrieval-Augmented Generation (RAG) system that allows users to chat with web
 - ChromaDB (Vector Database)
 - Python
 
+**Frontend:**
+- React
+- Axios
+- React Markdown
+
 **Data Storage:**
 - PostgreSQL/SQLite (Metadata)
 - ChromaDB (Vector Embeddings)
@@ -31,9 +36,10 @@ A Retrieval-Augmented Generation (RAG) system that allows users to chat with web
 
 ### Prerequisites
 - Python 3.8+
+- Node.js 14+ and npm
 - [Ollama](https://ollama.ai/) installed and running locally
 
-### Setup Steps
+### Backend Setup
 
 1. **Clone the repository**
    ```bash
@@ -48,8 +54,9 @@ A Retrieval-Augmented Generation (RAG) system that allows users to chat with web
    # source venv/bin/activate  # Linux/Mac
    ```
 
-3. **Install dependencies**
+3. **Install backend dependencies**
    ```bash
+   cd backend
    pip install -r requirements.txt
    ```
 
@@ -58,15 +65,35 @@ A Retrieval-Augmented Generation (RAG) system that allows users to chat with web
    python manage.py migrate
    ```
 
-5. **Start the server**
+5. **Start the backend server**
    ```bash
    python manage.py runserver
    ```
 
-   Or use the provided batch script:
+   Or use the provided batch script (from root directory):
    ```bash
    start_backend.bat
    ```
+
+### Frontend Setup
+
+1. **Install frontend dependencies**
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. **Start the frontend development server**
+   ```bash
+   npm start
+   ```
+
+   Or use the provided batch script (from root directory):
+   ```bash
+   start_frontend.bat
+   ```
+
+The frontend will automatically open at `http://localhost:3000` and connect to the backend at `http://localhost:8000`.
 
 ## Usage
 
@@ -126,4 +153,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-Made with ❤️ using Django, Ollama, and ChromaDB
+Made using Django, Ollama, LangChain, and ChromaDB
