@@ -139,6 +139,46 @@ On startup, the system automatically:
 
 Alternatively, you can drag and drop the video file here when editing this README on GitHub to generate an embeddable link.
 
+## Future Enhancements
+
+We're continuously working to improve this RAG system. Here are the planned features for upcoming releases:
+
+### 📹 Video Content Support (v2.0)
+- **YouTube Integration**: Insert any YouTube video link and chat with its content
+- **Video Transcription**: Automatic extraction and vectorization of video transcripts
+- **Timestamp References**: Get answers with specific video timestamps for context
+- **Multi-language Support**: Support for videos in different languages
+
+### 🔍 Advanced Search & Discovery (v2.1)
+- **Full-text Search**: Fast search across all vectorized content
+- **Semantic Search**: Find similar content across multiple websites
+- **Filter & Sort**: Advanced filtering by date, relevance, and source
+- **Search History**: Track and revisit previous searches
+
+### 🛠️ Enhanced Tools & Features (v2.2)
+- **PDF Document Support**: Upload and chat with PDF documents
+- **Batch Processing**: Scrape and vectorize multiple URLs at once
+- **Content Summarization**: Generate automatic summaries of websites
+- **Export Functionality**: Export chat history and extracted content
+- **API Rate Limiting**: Implement rate limiting for production use
+- **User Authentication**: Multi-user support with authentication
+
+### 🎨 UI/UX Improvements (v2.3)
+- **Dark Mode**: Toggle between light and dark themes
+- **Chat History**: Persistent chat history across sessions
+- **Markdown Rendering**: Enhanced rendering for code blocks and formatting
+- **Mobile Responsive**: Optimized mobile experience
+- **Keyboard Shortcuts**: Power-user keyboard navigation
+
+### 🚀 Performance & Scalability (v2.4)
+- **Caching Layer**: Redis caching for faster responses
+- **Async Processing**: Background job processing for scraping
+- **Database Optimization**: PostgreSQL for production deployments
+- **Docker Support**: Containerized deployment with Docker Compose
+- **Cloud Storage**: S3/Azure Blob storage for vector databases
+
+**Want to contribute to these features?** Check out our [Contributing](#contributing) section below!
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
