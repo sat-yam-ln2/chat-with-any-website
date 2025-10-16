@@ -476,7 +476,7 @@ class WebsiteViewSet(viewsets.ModelViewSet):
             Question: {query}
 
             Instructions:
-            1. Provide a clear, concise answer (maximum 3-4 sentences)
+            1. Provide a clear, concise answer, answer that is directly relevant to the question
             2. Focus only on the most important information that directly answers the question
             3. Do NOT include any of your thinking process in your response
             4. NEVER use <think> tags or show your reasoning process

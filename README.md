@@ -1,23 +1,76 @@
 # Chat with Website - RAG System
 
-A Retrieval-Augmented Generation (RAG) system that allows users to chat with website content through a conversational interface.
+## About
 
-## System Features
+A Retrieval-Augmented Generation (RAG) system that allows users to chat with website content through a conversational interface. This system scrapes website content, vectorizes it, and enables natural language queries using local language models through Ollama.
 
-### Backend Components
+## Features
 
-- **Ollama Integration**: Utilizes Ollama for local language model processing
-- **Vector Database Management**: Stores and retrieves website content embeddings
-- **Django REST Framework**: Provides a robust API interface
+- 🤖 **Local AI Processing**: Utilizes Ollama for privacy-focused language model processing
+- 🔍 **Website Scraping**: Automatically scrapes and processes website content
+- 💾 **Vector Database**: Stores website embeddings using ChromaDB for efficient retrieval
+- 💬 **Conversational Interface**: Chat naturally with website content
+- 📊 **Multiple Website Support**: Manage and query multiple vectorized websites
+- 🔄 **RESTful API**: Clean API interface built with Django REST Framework
+- ✅ **System Monitoring**: Built-in health checks and system information endpoints
 
-### Startup Processes
+## Tech Stack
 
-The system performs several checks during startup:
-- Verifies Ollama availability and version
-- Lists all vectorized databases
-- Displays available API endpoints
+**Backend:**
+- Django & Django REST Framework
+- Ollama (Local LLM)
+- ChromaDB (Vector Database)
+- Python
 
-## API Endpoints
+**Data Storage:**
+- PostgreSQL/SQLite (Metadata)
+- ChromaDB (Vector Embeddings)
+- CSV (Raw Content)
+
+## Installation
+
+### Prerequisites
+- Python 3.8+
+- [Ollama](https://ollama.ai/) installed and running locally
+
+### Setup Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd chat-bot-rag
+   ```
+
+2. **Create and activate virtual environment**
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate  # Windows
+   # source venv/bin/activate  # Linux/Mac
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run migrations**
+   ```bash
+   python manage.py migrate
+   ```
+
+5. **Start the server**
+   ```bash
+   python manage.py runserver
+   ```
+
+   Or use the provided batch script:
+   ```bash
+   start_backend.bat
+   ```
+
+## Usage
+
+### API Endpoints
 
 | Endpoint | Method | Description | Parameters |
 |----------|--------|-------------|------------|
@@ -26,25 +79,51 @@ The system performs several checks during startup:
 | `/api/websites/scrape/` | POST | Scrapes and vectorizes a website | `url`: Website URL |
 | `/api/websites/chat/` | POST | Chats with vectorized content | `vector_db_id`: Database ID, `query`: User question |
 
-## Setup and Running
+### Example: Scrape a Website
+```bash
+curl -X POST http://localhost:8000/api/websites/scrape/ \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com"}'
+```
 
-1. Ensure Ollama is installed and running locally
-2. Execute the `start_backend.bat` script which:
-   - Activates the virtual environment
-   - Creates necessary directories
-   - Applies database migrations
-   - Starts the Django server
+### Example: Chat with Website
+```bash
+curl -X POST http://localhost:8000/api/websites/chat/ \
+  -H "Content-Type: application/json" \
+  -d '{"vector_db_id": 1, "query": "What is this website about?"}'
+```
 
-## Data Management
+### System Startup
 
-- Website content: Stored in CSV format and database
-- Vector embeddings: Maintained in ChromaDB format
-- Website metadata: Tracked in Django database
+On startup, the system automatically:
+- ✅ Verifies Ollama availability and version
+- 📋 Lists all vectorized databases
+- 🌐 Displays available API endpoints
 
-## Error Handling
+## Screenshots
 
-The system implements comprehensive error handling:
-- Validates Ollama availability
-- Verifies vector database existence
-- Provides detailed error messages
-- Handles exceptions with appropriate HTTP status codes
+_Screenshots coming soon_
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact
+
+**Project Maintainer:** Satyam
+
+**Project Link:** [https://github.com/yourusername/chat-bot-rag](https://github.com/yourusername/chat-bot-rag)
+
+---
+
+Made with ❤️ using Django, Ollama, and ChromaDB
