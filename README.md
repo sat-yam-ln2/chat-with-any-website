@@ -135,9 +135,9 @@ On startup, the system automatically:
 
 ### Video Demo
 
-https://github.com/user-attachments/assets/demo.mp4
+> **Note:** To view the demo video, please see [demo/screen_recording/demo.mp4](demo/screen_recording/demo.mp4) in the repository.
 
-*For the best viewing experience, you can also watch the demo video directly: [demo/screen_recording/demo.mp4](demo/screen_recording/demo.mp4)*
+Alternatively, you can drag and drop the video file here when editing this README on GitHub to generate an embeddable link.
 
 ## Contributing
 
