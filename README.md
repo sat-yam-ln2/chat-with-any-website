@@ -127,9 +127,17 @@ On startup, the system automatically:
 - 📋 Lists all vectorized databases
 - 🌐 Displays available API endpoints
 
-## Screenshots
+## Demo
 
-_Screenshots coming soon_
+### Interface Screenshot
+
+![Application Interface](demo/screenshots/interface.png)
+
+### Video Demo
+
+https://github.com/user-attachments/assets/demo.mp4
+
+*For the best viewing experience, you can also watch the demo video directly: [demo/screen_recording/demo.mp4](demo/screen_recording/demo.mp4)*
 
 ## Contributing
 

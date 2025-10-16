@@ -72,7 +72,17 @@ const VectorSelection = ({ onSelectWebsite }) => {
       
     } catch (err) {
       console.error('Error deleting website:', err);
-      setError(`Failed to delete website: ${err.response?.data?.error || err.message}`);
+      const errorMessage = err.response?.data?.error || err.message;
+      
+      // Check if it's a file lock error
+      if (errorMessage.includes('process is using') || errorMessage.includes('restart the server')) {
+        setError(
+          `⚠️ Cannot delete: Database files are in use.\n\n` +
+          `Please restart the Django server and try again. This ensures all database connections are properly closed.`
+        );
+      } else {
+        setError(`Failed to delete website: ${errorMessage}`);
+      }
     } finally {
       setDeletingId(null);
     }

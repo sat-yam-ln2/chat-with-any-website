@@ -196,6 +196,7 @@ class WebsiteViewSet(viewsets.ModelViewSet):
         
         try:
             import shutil
+            import gc
             
             # Get the website from database
             try:
@@ -205,11 +206,41 @@ class WebsiteViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'Website not found in database'}, 
                               status=status.HTTP_404_NOT_FOUND)
             
-            # Delete vector database directory
+            # Force garbage collection to close any open ChromaDB connections
+            gc.collect()
+            
+            # Delete vector database directory with retry logic for Windows file locks
             vector_db_path = os.path.join(settings.VECTOR_DB_PATH, vector_db_id)
             if os.path.exists(vector_db_path):
-                shutil.rmtree(vector_db_path)
-                self.logger.info(f"Deleted vector database: {vector_db_path}")
+                max_retries = 3
+                retry_delay = 0.5
+                
+                for attempt in range(max_retries):
+                    try:
+                        # On Windows, use onerror handler to force deletion
+                        def handle_remove_readonly(func, path, exc):
+                            """Handle removal of readonly files on Windows"""
+                            import stat
+                            if not os.access(path, os.W_OK):
+                                # Change the file to be writable
+                                os.chmod(path, stat.S_IWUSR)
+                                func(path)
+                            else:
+                                raise
+                        
+                        shutil.rmtree(vector_db_path, onerror=handle_remove_readonly)
+                        self.logger.info(f"Deleted vector database: {vector_db_path}")
+                        break
+                    except PermissionError as pe:
+                        if attempt < max_retries - 1:
+                            self.logger.warning(f"Attempt {attempt + 1} failed, retrying after {retry_delay}s...")
+                            time.sleep(retry_delay)
+                            gc.collect()  # Try garbage collection again
+                        else:
+                            raise Exception(
+                                f"Unable to delete vector database after {max_retries} attempts. "
+                                "Please ensure no other process is using the database, restart the server, and try again."
+                            )
             
             # Delete scraped CSV file
             csv_filename = os.path.join(settings.SCRAPED_DATA_PATH, f"{vector_db_id}_scraped_data.csv")
@@ -497,34 +528,46 @@ class WebsiteViewSet(viewsets.ModelViewSet):
             embedding_model = OllamaEmbeddings(model="mxbai-embed-large")
             
             # Initialize vector store
-            vector_store = Chroma(
-                collection_name=f"website_content_{vector_db_id}",
-                persist_directory=vector_db_path,
-                embedding_function=embedding_model
-            )
-        
+            vector_store = None
+            try:
+                vector_store = Chroma(
+                    collection_name=f"website_content_{vector_db_id}",
+                    persist_directory=vector_db_path,
+                    embedding_function=embedding_model
+                )
             
-            # Create a retriever
-            retriever = vector_store.as_retriever(search_kwargs={"k": 5})
-            
-            # Retrieve relevant documents
-            relevant_docs = retriever.invoke(query)
-            
-            # Extract text content from the Document objects
-            relevant_content = "\n\n".join([doc.page_content for doc in relevant_docs])
-            
-            # Generate a response
-            response = qa_chain.invoke({"content": relevant_content, "query": query})
-            
-            # Strip any <think>...</think> content from the response
-            import re
-            cleaned_response = re.sub(r'<think>.*?</think>', '', str(response), flags=re.DOTALL).strip()
-            
-            return Response({
-                'answer': cleaned_response,
-                'relevant_content': relevant_content,
-                'source_count': len(relevant_docs)
-            })
+                
+                # Create a retriever
+                retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+                
+                # Retrieve relevant documents
+                relevant_docs = retriever.invoke(query)
+                
+                # Extract text content from the Document objects
+                relevant_content = "\n\n".join([doc.page_content for doc in relevant_docs])
+                
+                # Generate a response
+                response = qa_chain.invoke({"content": relevant_content, "query": query})
+                
+                # Strip any <think>...</think> content from the response
+                import re
+                cleaned_response = re.sub(r'<think>.*?</think>', '', str(response), flags=re.DOTALL).strip()
+                
+                return Response({
+                    'answer': cleaned_response,
+                    'relevant_content': relevant_content,
+                    'source_count': len(relevant_docs)
+                })
+            finally:
+                # Explicitly clean up vector store to release file handles
+                if vector_store is not None:
+                    try:
+                        del vector_store
+                    except:
+                        pass
+                # Force garbage collection to ensure resources are released
+                import gc
+                gc.collect()
             
         except Exception as e:
             print(f"Error in chat endpoint: {str(e)}")

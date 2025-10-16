@@ -68,19 +68,14 @@ const SystemInfo = () => {
             <h4>Vectorized Databases</h4>
             {systemInfo?.vectorized_databases?.length > 0 ? (
               <ul className="database-list">
-                {systemInfo.vectorized_databases.map((dbId, index) => {
-                  // Try to find the corresponding website
-                  const website = systemInfo.websites.find(w => w.vector_db_id === dbId);
-                  return (
-                    <li key={dbId}>
-                      {website ? (
-                        <span>{website.url} <small>(ID: {dbId})</small></span>
-                      ) : (
-                        <span>Unknown website <small>(ID: {dbId})</small></span>
-                      )}
-                    </li>
-                  );
-                })}
+                {systemInfo.vectorized_databases.map((website) => (
+                  <li key={website.vector_db_id}>
+                    <span>
+                      {website.url}
+                      <small>(ID: {website.vector_db_id})</small>
+                    </span>
+                  </li>
+                ))}
               </ul>
             ) : (
               <p>No vectorized databases found. Try scraping a website first.</p>
